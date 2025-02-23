@@ -82,30 +82,35 @@ def get_hurricanes():
     """ Returns all hurricane data. """
     return parse_hurdat2()
 
-
 @app.get("/api/florida-landfalls")
 def get_florida_landfalls():
-    """ Returns hurricanes that made landfall in Florida since 1900. """
+    """ Detect hurricanes that made landfall in Florida without using the 'L' indicator. """
     parsed_data = parse_hurdat2()
     florida_landfalls = []
 
     for storm in parsed_data:
-        if int(storm["Year"]) >= 1900:  # Ensure year is 1900 or later
+        if int(storm["Year"]) >= 1900:  # Filter year >= 1900
+            previous_entry = None
+
             for entry in storm["Entries"]:
-                if (
-                    FLORIDA_LAT_MIN <= entry["Latitude"] <= FLORIDA_LAT_MAX
-                    and FLORIDA_LON_MIN <= entry["Longitude"] <= FLORIDA_LON_MAX
-                    and entry["Indicator"] == "L"
-                ):
-                    florida_landfalls.append({
-                        "Hurricane": storm["Name"],
-                        "Year": storm["Year"],
-                        "Date": entry["Date"],
-                        "Time": entry["Time"],
-                        "Latitude": entry["Latitude"],
-                        "Longitude": entry["Longitude"],
-                        "Max Wind Speed (knots)": entry["Max_Wind_Speed"]
-                    })
+                if previous_entry:
+                    # Check if the storm moves from ocean to Florida
+                    if (
+                        previous_entry["Longitude"] < FLORIDA_LON_MIN  # Previously offshore
+                        and FLORIDA_LAT_MIN <= entry["Latitude"] <= FLORIDA_LAT_MAX
+                        and FLORIDA_LON_MIN <= entry["Longitude"] <= FLORIDA_LON_MAX
+                    ):
+                        florida_landfalls.append({
+                            "Hurricane": storm["Name"],
+                            "Year": storm["Year"],
+                            "Date": entry["Date"],
+                            "Time": entry["Time"],
+                            "Latitude": entry["Latitude"],
+                            "Longitude": entry["Longitude"],
+                            "Max Wind Speed (knots)": entry["Max_Wind_Speed"]
+                        })
+
+                previous_entry = entry  # Update previous entry for next iteration
 
     return florida_landfalls
 
