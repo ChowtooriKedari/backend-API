@@ -12,7 +12,7 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-HURDAT2_FILE = "c:\\Users\\kedar\\OneDrive\\Desktop\\Hurricanes.txt"
+HURDAT2_FILE = "https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2023-051124.txt"
 
 FLORIDA_LAT_MIN, FLORIDA_LAT_MAX = 24.5, 31.0
 FLORIDA_LON_MIN, FLORIDA_LON_MAX = -87.6, -79.8
